@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Элитная Слот-Рулетка Казино</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a0630, #2d0b5e, #0e0725);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(106, 27, 154, 0.2) 0%, transparent 70%);
+            z-index: -1;
+            animation: rotate 30s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .background-lights {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .light-beam {
+            position: absolute;
+            width: 200%;
+            height: 20px;
+            background: linear-gradient(90deg, transparent, rgba(186, 104, 200, 0.3), transparent);
+            transform: rotate(-45deg);
+            animation: beamMove 15s linear infinite;
+        }
+
+        .light-beam:nth-child(2) {
+            top: 30%;
+            animation-delay: -5s;
+        }
+
+        .light-beam:nth-child(3) {
+            top: 60%;
+            animation-delay: -10s;
+        }
+
+        @keyframes beamMove {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+
+        header {
+            margin-bottom: 20px;
+            width: 100%;
+            text-align: center;
+            padding: 15px;
+            background: rgba(74, 20, 140, 0.5);
+            border-radius: 15px;
+            border: 1px solid rgba(156, 39, 176, 0.5);
+            box-shadow: 0 0 20px rgba(156, 39, 176, 0.5);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(156, 39, 176, 0.3), transparent);
+            animation: headerGlow 3s linear infinite;
+        }
+
+        @keyframes headerGlow {
+            100% { left: 100%; }
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5),
+                         0 0 20px rgba(255, 215, 0, 0.3),
+                         0 0 30px rgba(255, 215, 0, 0.2);
+            letter-spacing: 1.5px;
+        }
+
+        .bet-selection {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .bet-btn {
+            background: rgba(81, 45, 168, 0.7);
+            color: #ddd;
+            border: none;
+            padding: 12px 20px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            border: 1px solid rgba(156, 39, 176, 0.5);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .bet-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(156, 39, 176, 0.4);
+        }
+
+        .bet-btn.active {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            color: white;
+            border: 1px solid #ffd700;
+            box-shadow: 0 0 20px rgba(156, 39, 176, 0.7);
+            transform: scale(1.05);
+        }
+
+        .info {
+            background: rgba(74, 20, 140, 0.5);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            width: 100%;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 20px rgba(156, 39, 176, 0.5);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+
+        .slots-container {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            background: rgba(74, 20, 140, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            padding-top: 20px;
+            perspective: 1000px;
+            border: 2px solid rgba(156, 39, 176, 0.5);
+        }
+
+        .pointer {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            z-index: 100;
+            filter: drop-shadow(0 0 15px gold);
+        }
+
+        .pointer svg {
+            width: 100%;
+            height: 100%;
+            fill: #ffd700;
+        }
+
+        .slots-track {
+            display: flex;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            transition-timing-function: cubic-bezier(0.1, 0.8, 0.2, 1);
+            animation: idleSpin 60s linear infinite;
+        }
+
+        @keyframes idleSpin {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .slot {
+            width: 120px;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            font-weight: bold;
+            flex-shrink: 0;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.7);
+            transition: transform 0.5s ease, filter 0.5s ease;
+            transform-style: preserve-3d;
+            transform: rotateX(10deg);
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            margin: 0 5px;
+        }
+
+        .slot.nft {
+            background: transparent;
+            padding: 5px;
+        }
+
+        .nft-image-slot {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .spin-btn {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            color: white;
+            border: none;
+            padding: 20px 60px;
+            font-size: 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4),
+                        0 0 30px rgba(156, 39, 176, 0.6);
+            transition: all 0.3s ease;
+            width: 90%;
+            max-width: 350px;
+            letter-spacing: 1.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            border: 1px solid rgba(255, 215, 0, 0.5);
+        }
+
+        .spin-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+
+        .spin-btn:hover::before {
+            left: 100%;
+        }
+
+        .spin-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5),
+                        0 0 40px rgba(156, 39, 176, 0.8);
+        }
+
+        .spin-btn:disabled {
+            background: linear-gradient(135deg, #555, #333);
+            box-shadow: none;
+            transform: none;
+            cursor: not-allowed;
+        }
+
+        footer {
+            margin-top: 20px;
+            padding: 20px;
+            color: #aaa;
+            font-size: 16px;
+            width: 100%;
+            background: rgba(74, 20, 140, 0.5);
+            border-radius: 15px;
+            border: 1px solid rgba(156, 39, 176, 0.5);
+            box-shadow: 0 0 15px rgba(156, 39, 176, 0.3);
+        }
+
+        .loader {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loader-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 50px;
+            border-radius: 25px;
+            text-align: center;
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
+        }
+
+        .spinner {
+            border: 6px solid rgba(255, 255, 255, 0.1);
+            border-top: 6px solid #ffd700;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 30px;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .win-animation {
+            animation: winPulse 0.5s infinite alternate;
+        }
+
+        @keyframes winPulse {
+            from { transform: scale(1); box-shadow: 0 0 15px gold; }
+            to { transform: scale(1.05); box-shadow: 0 0 40px gold; }
+        }
+
+        .center-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 100%;
+            background: rgba(255, 215, 0, 0.7);
+            z-index: 50;
+            box-shadow: 0 0 15px gold;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: gold;
+            border-radius: 50%;
+            animation: particleMove 1s ease-out forwards;
+            opacity: 0.8;
+        }
+
+        @keyframes particleMove {
+            0% {
+                transform: translate(0, 0);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty));
+                opacity: 0;
+            }
+        }
+
+        @keyframes vibrate {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-3px); }
+            100% { transform: translateX(0); }
+        }
+
+        .vibrate {
+            animation: vibrate 0.3s ease-in-out;
+        }
+
+        /* Модальное окно победы */
+        .win-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .win-content {
+            background: linear-gradient(135deg, #1a0630, #2d0b5e);
+            padding: 40px;
+            border-radius: 25px;
+            text-align: center;
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.6);
+            max-width: 90%;
+            width: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .win-content::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%);
+            animation: rotate 15s linear infinite;
+            z-index: -1;
+        }
+
+        .win-title {
+            font-size: 42px;
+            color: #ffd700;
+            margin-bottom: 25px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        }
+
+        .win-prize {
+            font-size: 36px;
+            margin-bottom: 30px;
+            color: white;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .nft-image {
+            width: 250px;
+            height: 250px;
+            border-radius: 15px;
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+            margin: 20px auto;
+            background-size: cover;
+            background-position: center;
+            display: none;
+        }
+
+        .coins-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(74, 20, 140, 0.5);
+            border-radius: 15px;
+            border: 1px solid rgba(156, 39, 176, 0.5);
+            box-shadow: 0 0 15px rgba(156, 39, 176, 0.3);
+        }
+
+        .coins-icon {
+            font-size: 32px;
+            color: #ffd700;
+        }
+
+        .coins-amount {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+        }
+
+        /* Адаптивные стили */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+
+            .bet-btn {
+                padding: 10px 15px;
+                min-width: 90px;
+                font-size: 16px;
+            }
+
+            .slot {
+                width: 90px;
+                height: 90px;
+                font-size: 28px;
+            }
+
+            .spin-btn {
+                padding: 16px 40px;
+                font-size: 20px;
+            }
+
+            .win-title {
+                font-size: 36px;
+            }
+
+            .win-prize {
+                font-size: 28px;
+            }
+
+            .nft-image {
+                width: 200px;
+                height: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 24px;
+            }
+
+            .bet-selection {
+                gap: 8px;
+            }
+
+            .bet-btn {
+                padding: 8px 12px;
+                min-width: 80px;
+                font-size: 14px;
+            }
+
+            .slot {
+                width: 70px;
+                height: 70px;
+                font-size: 24px;
+            }
+
+            .spin-btn {
+                padding: 14px 30px;
+                font-size: 18px;
+            }
+
+            .win-title {
+                font-size: 32px;
+            }
+
+            .win-prize {
+                font-size: 24px;
+            }
+
+            .nft-image {
+                width: 180px;
+                height: 180px;
+            }
+
+            .coins-display {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="background-lights">
+    <div class="light-beam"></div>
+    <div class="light-beam"></div>
+    <div class="light-beam"></div>
+</div>
+
+<div class="loader" id="loader">
+    <div class="loader-content">
+        <div class="spinner"></div>
+        <p>Синхронизация с сервером...</p>
+    </div>
+</div>
+
+<div class="win-modal" id="winModal">
+    <div class="win-content">
+        <div class="win-title" id="winTitle">ПОБЕДА!</div>
+        <div class="win-prize" id="winPrize"></div>
+        <div class="nft-image" id="nftImage"></div>
+    </div>
+</div>
+
+<div class="particles" id="particles"></div>
+
+<div class="container">
+    <header>
+        <h1>🎰 ЭЛИТНАЯ РУЛЕТКА КАЗИНО</h1>
+        <p>Крутите слоты и выигрывайте призы!</p>
+    </header>
+
+    <div class="coins-display">
+        <div class="coins-icon">🪙</div>
+        <div class="coins-amount">Ваши звёзды: <span id="coinsCount">0</span></div>
+    </div>
+
+    <div class="bet-selection">
+        <button class="bet-btn active" data-bet="100">100 🪙</button>
+        <button class="bet-btn" data-bet="1000">1000 🪙</button>
+        <button class="bet-btn" data-bet="10000">10000 🪙</button>
+    </div>
+
+    <div class="info">
+        <p>Призы: 15, 25, 50, 100 звёзд или NFT!</p>
+    </div>
+
+    <div class="slots-container">
+        <div class="pointer">
+            <svg viewBox="0 0 24 24">
+                <path d="M12,2 L22,22 L2,22 Z"></path>
+            </svg>
+        </div>
+        <div class="center-line"></div>
+        <div class="slots-track" id="slotsTrack"></div>
+    </div>
+
+    <button class="spin-btn" id="spinBtn">🎡 КРУТИТЬ РУЛЕТКУ</button>
+
+    <footer>
+        <p>Удачи! Ваш выигрыш будет автоматически зачислен на баланс</p>
+    </footer>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const WebApp = window.Telegram.WebApp;
+        WebApp.ready();
+        WebApp.expand();
+
+        const loader = document.getElementById('loader');
+        const slotsTrack = document.getElementById('slotsTrack');
+        const spinBtn = document.getElementById('spinBtn');
+        const particlesContainer = document.getElementById('particles');
+        const winModal = document.getElementById('winModal');
+        const winPrize = document.getElementById('winPrize');
+        const winTitle = document.getElementById('winTitle');
+        const nftImage = document.getElementById('nftImage');
+        const coinsCount = document.getElementById('coinsCount');
+        const betButtons = document.querySelectorAll('.bet-btn');
+
+        // Параметры запуска
+        const params = new URLSearchParams(window.location.search);
+        let userId = params.get('user_id');
+        let userBalance = parseInt(params.get('balance')) || 0;
+        let token = params.get('token');
+
+        coinsCount.textContent = userBalance;
+
+        // Текущая ставка
+        let currentBet = 100;
+        let isSpinning = false;
+        let isModalOpen = false;
+        let lastUsedNFTs = {};
+        let winSlotElement = null;
+        let animationFrameId = null;
+        let winModalTimeout = null;
+        let waitingForServer = false;
+
+        // NFT изображения для разных ставок
+        const nftImages = {
+            100: [
+                "https://picsum.photos/id/10/200/200",
+                "https://picsum.photos/id/11/200/200",
+                "https://picsum.photos/id/12/200/200",
+                "https://picsum.photos/id/13/200/200",
+                "https://picsum.photos/id/14/200/200",
+                "https://picsum.photos/id/15/200/200",
+                "https://picsum.photos/id/16/200/200",
+                "https://picsum.photos/id/17/200/200"
+            ],
+            1000: [
+                "https://picsum.photos/id/18/200/200",
+                "https://picsum.photos/id/19/200/200",
+                "https://picsum.photos/id/20/200/200",
+                "https://picsum.photos/id/21/200/200",
+                "https://picsum.photos/id/22/200/200",
+                "https://picsum.photos/id/23/200/200",
+                "https://picsum.photos/id/24/200/200",
+                "https://picsum.photos/id/25/200/200"
+            ],
+            10000: [
+                "https://picsum.photos/id/26/200/200",
+                "https://picsum.photos/id/27/200/200",
+                "https://picsum.photos/id/28/200/200",
+                "https://picsum.photos/id/29/200/200",
+                "https://picsum.photos/id/30/200/200",
+                "https://picsum.photos/id/31/200/200",
+                "https://picsum.photos/id/32/200/200",
+                "https://picsum.photos/id/33/200/200"
+            ]
+        };
+
+        // Секторы рулетки для разных ставок
+        const sectors = {
+            100: [
+                { value: "15", type: "coins" },
+                { value: "25", type: "coins" },
+                { value: "50", type: "coins" },
+                { value: "100", type: "coins" },
+                { value: "NFT", type: "nft" },
+                { value: "NFT", type: "nft" },
+                { value: "NFT", type: "nft" }
+            ],
+            1000: [
+                { value: "15", type: "coins" },
+                { value: "25", type: "coins" },
+                { value: "50", type: "coins" },
+                { value: "100", type: "coins" },
+                { value: "NFT", type: "nft" },
+                { value: "NFT", type: "nft" },
+                { value: "NFT", type: "nft" }
+            ],
+            10000: [
+                { value: "15", type: "coins" },
+                { value: "25", type: "coins" },
+                { value: "50", type: "coins" },
+                { value: "100", type: "coins" },
+                { value: "NFT", type: "nft" },
+                { value: "NFT", type: "nft" },
+                { value: "NFT", type: "nft" }
+            ]
+        };
+
+        // Функция для перемешивания массива (алгоритм Фишера-Йейтса)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Создать рулетку
+        function createSlots() {
+            slotsTrack.innerHTML = '';
+
+            // Создаем копию секторов для текущей ставки и перемешиваем их
+            const shuffledSectors = shuffleArray([...sectors[currentBet]]);
+            const slotSets = 40;
+
+            if (!lastUsedNFTs[currentBet]) {
+                lastUsedNFTs[currentBet] = [];
+            }
+
+            for (let i = 0; i < slotSets; i++) {
+                shuffledSectors.forEach((sector, sectorIndex) => {
+                    const slot = document.createElement('div');
+                    slot.className = 'slot';
+                    slot.dataset.index = sectorIndex;
+                    slot.dataset.set = i;
+
+                    // Сохраняем данные сектора
+                    slot.dataset.value = sector.value;
+                    slot.dataset.type = sector.type;
+
+                    if (sector.type === "nft") {
+                        slot.classList.add('nft');
+                        const img = document.createElement('img');
+                        img.className = 'nft-image-slot';
+
+                        // Выбор уникальной картинки
+                        let randomImage;
+                        let attempts = 0;
+
+                        do {
+                            randomImage = nftImages[currentBet][Math.floor(Math.random() * nftImages[currentBet].length)];
+                            attempts++;
+
+                            if (attempts > 50) {
+                                lastUsedNFTs[currentBet] = [];
+                                break;
+                            }
+                        } while (lastUsedNFTs[currentBet].includes(randomImage));
+
+                        lastUsedNFTs[currentBet].push(randomImage);
+                        if (lastUsedNFTs[currentBet].length > 10) {
+                            lastUsedNFTs[currentBet].shift();
+                        }
+
+                        img.src = randomImage;
+                        slot.appendChild(img);
+                    } else {
+                        slot.textContent = sector.value;
+                    }
+
+                    slotsTrack.appendChild(slot);
+                });
+            }
+
+            // Сброс позиции трека
+            slotsTrack.style.transform = `translateX(0)`;
+        }
+
+        // Запустить фоновое вращение
+        function startIdleAnimation() {
+            slotsTrack.style.animation = 'none';
+            setTimeout(() => {
+                slotsTrack.style.animation = 'idleSpin 60s linear infinite';
+            }, 10);
+        }
+
+        // Остановить фоновое вращение
+        function stopIdleAnimation() {
+            slotsTrack.style.animation = 'none';
+        }
+
+        // Сбросить стили всех слотов
+        function resetAllSlots() {
+            const slots = document.querySelectorAll('.slot');
+            slots.forEach(slot => {
+                slot.style.transform = '';
+                slot.style.filter = '';
+                slot.style.transition = '';
+                slot.classList.remove('win-animation');
+            });
+
+            if (winSlotElement) {
+                winSlotElement.style.transform = '';
+                winSlotElement.style.filter = '';
+                winSlotElement = null;
+            }
+        }
+
+        // Обработчики выбора ставки
+        betButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (isSpinning || isModalOpen || waitingForServer) return;
+
+                betButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentBet = parseInt(btn.dataset.bet);
+
+                createSlots();
+                setTimeout(startIdleAnimation, 100);
+            });
+        });
+
+        // Инициализация рулетки
+        createSlots();
+
+        // Скрыть загрузчик
+        setTimeout(() => {
+            loader.style.display = 'none';
+            startIdleAnimation();
+
+            // Запрос баланса при загрузке
+            WebApp.sendData(JSON.stringify({
+                action: "get_balance",
+                token: token
+            }));
+        }, 800);
+
+        // Создать эффект частиц
+        function createParticles(x, y, count, color) {
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.background = color;
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 50 + Math.random() * 150;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+
+                particle.style.setProperty('--tx', `${tx}px`);
+                particle.style.setProperty('--ty', `${ty}px`);
+
+                particlesContainer.appendChild(particle);
+
+                setTimeout(() => {
+                    particle.remove();
+                }, 1000);
+            }
+        }
+
+        // Показать окно победы
+        function showWinModal(winSector, winSlot) {
+            isModalOpen = true;
+
+            if (winSector.type === "nft") {
+                const img = winSlot.querySelector('img');
+                if (img) {
+                    nftImage.style.backgroundImage = `url(${img.src})`;
+                    nftImage.style.display = 'block';
+                }
+                winPrize.textContent = "Редкий NFT!";
+                winTitle.textContent = "NFT НАЙДЕН!";
+            } else {
+                nftImage.style.display = 'none';
+                winPrize.textContent = `Вы выиграли ${winSector.value} звёзд!`;
+                winTitle.textContent = "ПОБЕДА!";
+            }
+
+            winModal.style.display = 'flex';
+
+            // Отправка результата в бот
+            WebApp.sendData(JSON.stringify({
+                action: "spin",
+                result: winSector.value,
+                result_type: winSector.type,
+                bet: currentBet,
+                token: token
+            }));
+        }
+
+        // Закрыть окно победы
+        function closeWinModal() {
+            if (winModalTimeout) {
+                clearTimeout(winModalTimeout);
+                winModalTimeout = null;
+            }
+
+            winModal.style.display = 'none';
+            resetAllSlots();
+
+            // Пересоздаем слоты для сброса позиции
+            createSlots();
+            setTimeout(startIdleAnimation, 100);
+
+            // Разблокировать кнопки после закрытия модального окна
+            isModalOpen = false;
+            spinBtn.disabled = false;
+            betButtons.forEach(btn => btn.disabled = false);
+        }
+
+        // Обработчик закрытия модального окна по клику
+        winModal.addEventListener('click', closeWinModal);
+
+        // Плавная функция замедления
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+
+        // Функция для вращения слотов
+        function spinSlots() {
+            if (isSpinning || isModalOpen || waitingForServer) return;
+
+            if (userBalance < currentBet) {
+                alert("Недостаточно звёзд!");
+                return;
+            }
+
+            isSpinning = true;
+            spinBtn.disabled = true;
+            betButtons.forEach(btn => btn.disabled = true);
+            loader.style.display = 'flex';
+            waitingForServer = true;
+
+            // Отправляем запрос на списание средств
+            WebApp.sendData(JSON.stringify({
+                action: "place_bet",
+                bet: currentBet,
+                token: token
+            }));
+        }
+
+        // Функция для запуска анимации вращения после подтверждения сервера
+        function startSpinning() {
+            stopIdleAnimation();
+            resetAllSlots();
+
+            spinBtn.classList.add('vibrate');
+            setTimeout(() => spinBtn.classList.remove('vibrate'), 300);
+
+            const containerRect = document.querySelector('.slots-container').getBoundingClientRect();
+            const slotElement = document.querySelector('.slot');
+            const slotStyle = getComputedStyle(slotElement);
+            const marginLeft = parseFloat(slotStyle.marginLeft);
+            const marginRight = parseFloat(slotStyle.marginRight);
+            const totalSlotWidth = slotElement.offsetWidth + marginLeft + marginRight;
+            const containerWidth = containerRect.width;
+
+            // Расчет конечной позиции
+            const cycles = 15 + Math.floor(Math.random() * 5);
+            const sectorCount = sectors[currentBet].length;
+            const winIndex = Math.floor(Math.random() * sectorCount);
+            const targetPosition = (cycles * sectorCount + winIndex) * totalSlotWidth - (containerWidth / 2 - totalSlotWidth / 2);
+
+            // Анимация вращения
+            let startTime = null;
+            const duration = 6000;
+
+            // Сохраняем начальную позицию (всегда 0)
+            const startPosition = 0;
+
+            slotsTrack.style.filter = "blur(3px)";
+
+            createParticles(
+                containerRect.left + containerWidth / 2,
+                containerRect.top + containerRect.height / 2,
+                50,
+                '#ffd700'
+            );
+
+            // Отменяем предыдущий requestAnimationFrame
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+
+            // Функция анимации
+            function animate(currentTime) {
+                if (!startTime) startTime = currentTime;
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Используем плавное замедление
+                const easedProgress = easeOutCubic(progress);
+                const newPosition = startPosition + (targetPosition - startPosition) * easedProgress;
+
+                // Обновляем позицию трека
+                slotsTrack.style.transform = `translateX(-${newPosition}px)`;
+
+                // Эффект частиц во время вращения
+                if (Math.random() < 0.2 && progress < 0.95) {
+                    createParticles(
+                        containerRect.left + containerWidth / 2,
+                        containerRect.top + containerRect.height / 2,
+                        5,
+                        '#ffd700'
+                    );
+                }
+
+                if (progress < 1) {
+                    animationFrameId = requestAnimationFrame(animate);
+                } else {
+                    // Финализация позиции
+                    slotsTrack.style.transform = `translateX(-${targetPosition}px)`;
+
+                    // Точное вычисление выигрышного слота по индексу
+                    const slotIndex = Math.floor((targetPosition + containerWidth / 2) / totalSlotWidth) % slotsTrack.children.length;
+                    const centerSlot = slotsTrack.children[slotIndex];
+
+                    const actualWinSector = {
+                        value: centerSlot.dataset.value,
+                        type: centerSlot.dataset.type
+                    };
+
+                    // Сохраняем элемент выигравшего слота
+                    winSlotElement = centerSlot;
+
+                    // Применяем стили к выигравшему слоту
+                    centerSlot.style.transform = "scale(1.15)";
+                    centerSlot.style.filter = "drop-shadow(0 0 25px gold) brightness(1.3)";
+                    centerSlot.style.transition = "all 0.5s ease";
+
+                    slotsTrack.style.filter = "none";
+
+                    createParticles(
+                        containerRect.left + containerWidth / 2,
+                        containerRect.top + containerRect.height / 2,
+                        100,
+                        '#ffd700'
+                    );
+
+                    setTimeout(() => {
+                        showWinModal(actualWinSector, centerSlot);
+                        isSpinning = false;
+                    }, 1500);
+                }
+            }
+
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+        spinBtn.addEventListener('click', spinSlots);
+
+        // Обработчик сообщений от Telegram бота
+        WebApp.onEvent('message', (event) => {
+            try {
+                const data = JSON.parse(event);
+
+                if (data.balance) {
+                    userBalance = data.balance === "∞" ? Infinity : parseInt(data.balance);
+                    coinsCount.textContent = data.balance;
+                }
+
+                if (data.action === "bet_accepted") {
+                    waitingForServer = false;
+                    loader.style.display = 'none';
+                    startSpinning();
+                }
+
+                if (data.action === "balance_updated") {
+                    userBalance = data.balance === "∞" ? Infinity : parseInt(data.balance);
+                    coinsCount.textContent = data.balance;
+                }
+
+                if (data.error === "insufficient_funds") {
+                    waitingForServer = false;
+                    loader.style.display = 'none';
+                    isSpinning = false;
+                    spinBtn.disabled = false;
+                    betButtons.forEach(btn => btn.disabled = false);
+                    alert("❌ Недостаточно средств для игры!");
+                }
+            } catch (e) {
+                console.error("Ошибка парсинга сообщения:", e);
+            }
+        });
+    });
+</script>
+</body>
+</html>
