@@ -22,8 +22,8 @@ from telegram.ext import (
     ConversationHandler
 )
 
-TOKEN = "8195776605:AAHh-lA-xGjRU_fARcgmPzU2t0gMNLtILpk"
-WEB_APP_URL = "https://zoli801.github.io/final_nft_game/"
+TOKEN = "8195776605:AAHS2WJHJ9lpBOHdqycFTGclRVBKtLMPkIg"
+WEB_APP_URL = "https://zoli801.github.io/nft_game_test/"
 
 # Основной файл Excel
 USER_DATA_FILE = "user_data.xlsx"
@@ -34,7 +34,7 @@ PURCHASE_SHEET = "История покупок"
 NFT_SHEET = "История NFT"
 
 # Пользователи с бесконечным балансом
-INFINITE_BALANCE_USERS = ["@zoli_800"]
+INFINITE_BALANCE_USERS = ["@zoli_main"]
 
 # Состояния
 INPUT_AMOUNT = 1
@@ -139,11 +139,6 @@ def add_purchase_record(user_id: int, username: str, amount: int):
 
         purchase_df = pd.concat([purchase_df, new_row], ignore_index=True)
 
-        # Обновление баланса
-        if user_id in balance_df["user_id"].values and not has_infinite_balance(username):
-            current_balance = balance_df.loc[balance_df["user_id"] == user_id, "balance"].values[0]
-            balance_df.loc[balance_df["user_id"] == user_id, "balance"] = current_balance + amount
-
         # Сохранение всех листов
         with pd.ExcelWriter(USER_DATA_FILE) as writer:
             balance_df.to_excel(writer, sheet_name=BALANCE_SHEET, index=False)
@@ -169,18 +164,6 @@ def add_nft_record(user_id: int, username: str, action: str):
         })
 
         nft_df = pd.concat([nft_df, new_row], ignore_index=True)
-
-        # Обновление счетчика NFT
-        if user_id in balance_df["user_id"].values:
-            current_nft = balance_df.loc[balance_df["user_id"] == user_id, "nft_count"].values[0]
-            if action == "Добавил NFT в коллекцию":
-                balance_df.loc[balance_df["user_id"] == user_id, "nft_count"] = current_nft + 1
-            elif action == "Продал NFT":
-                balance_df.loc[balance_df["user_id"] == user_id, "nft_count"] = current_nft - 1
-                # Добавление средств за продажу
-                if not has_infinite_balance(username):
-                    current_balance = balance_df.loc[balance_df["user_id"] == user_id, "balance"].values[0]
-                    balance_df.loc[balance_df["user_id"] == user_id, "balance"] = current_balance + 500
 
         # Сохранение всех листов
         with pd.ExcelWriter(USER_DATA_FILE) as writer:
@@ -443,16 +426,18 @@ async def handle_web_app_data(update: Update, context: CallbackContext) -> None:
 
         user_data = load_user_data(user_id, username)
 
+        # Сразу списываем 100 звезд за прокрут
         if not has_infinite_balance(username):
-            # Списание ставки
             if user_data['balance'] < bet_amount:
                 await update.message.reply_text("❌ Недостаточно средств для игры!")
                 return
 
+            # Списание средств за прокрут
             new_balance = user_data["balance"] - bet_amount
             update_user_data(user_id, username, new_balance, user_data["nft_count"])
             add_purchase_record(user_id, username, -bet_amount)
 
+        # Зачисление выигрыша
         if result_type == "coins":
             win_amount = int(result)
 
@@ -491,24 +476,6 @@ async def handle_web_app_data(update: Update, context: CallbackContext) -> None:
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
             text=json.dumps({"balance": balance})
-        )
-
-    elif action == "place_bet":
-        bet_amount = data.get('bet', 100)
-        user_data = load_user_data(user_id, username)
-
-        if not has_infinite_balance(username):
-            if user_data['balance'] < bet_amount:
-                await context.bot.send_message(
-                    chat_id=update.effective_chat.id,
-                    text=json.dumps({"error": "insufficient_funds"})
-                )
-                return
-
-        # Подтверждаем ставку
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=json.dumps({"action": "bet_accepted"})
         )
 
 

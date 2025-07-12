@@ -684,7 +684,6 @@
         let winSlotElement = null;
         let animationFrameId = null;
         let winModalTimeout = null;
-        let waitingForServer = false;
 
         // NFT изображения для разных ставок
         const nftImages = {
@@ -854,7 +853,7 @@
         // Обработчики выбора ставки
         betButtons.forEach(btn => {
             btn.addEventListener('click', () => {
-                if (isSpinning || isModalOpen || waitingForServer) return;
+                if (isSpinning || isModalOpen) return;
 
                 betButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
@@ -872,12 +871,6 @@
         setTimeout(() => {
             loader.style.display = 'none';
             startIdleAnimation();
-
-            // Запрос баланса при загрузке
-            WebApp.sendData(JSON.stringify({
-                action: "get_balance",
-                token: token
-            }));
         }, 800);
 
         // Создать эффект частиц
@@ -965,29 +958,21 @@
 
         // Функция для вращения слотов
         function spinSlots() {
-            if (isSpinning || isModalOpen || waitingForServer) return;
+            if (isSpinning || isModalOpen) return;
 
             if (userBalance < currentBet) {
                 alert("Недостаточно звёзд!");
                 return;
             }
 
+            // Сразу списываем средства за прокрут
+            userBalance -= currentBet;
+            coinsCount.textContent = userBalance;
+
             isSpinning = true;
             spinBtn.disabled = true;
             betButtons.forEach(btn => btn.disabled = true);
-            loader.style.display = 'flex';
-            waitingForServer = true;
 
-            // Отправляем запрос на списание средств
-            WebApp.sendData(JSON.stringify({
-                action: "place_bet",
-                bet: currentBet,
-                token: token
-            }));
-        }
-
-        // Функция для запуска анимации вращения после подтверждения сервера
-        function startSpinning() {
             stopIdleAnimation();
             resetAllSlots();
 
@@ -1084,6 +1069,13 @@
                         '#ffd700'
                     );
 
+                    // Зачисляем выигрыш
+                    if (actualWinSector.type === "coins") {
+                        const winAmount = parseInt(actualWinSector.value);
+                        userBalance += winAmount;
+                        coinsCount.textContent = userBalance;
+                    }
+
                     setTimeout(() => {
                         showWinModal(actualWinSector, centerSlot);
                         isSpinning = false;
@@ -1104,26 +1096,6 @@
                 if (data.balance) {
                     userBalance = data.balance === "∞" ? Infinity : parseInt(data.balance);
                     coinsCount.textContent = data.balance;
-                }
-
-                if (data.action === "bet_accepted") {
-                    waitingForServer = false;
-                    loader.style.display = 'none';
-                    startSpinning();
-                }
-
-                if (data.action === "balance_updated") {
-                    userBalance = data.balance === "∞" ? Infinity : parseInt(data.balance);
-                    coinsCount.textContent = data.balance;
-                }
-
-                if (data.error === "insufficient_funds") {
-                    waitingForServer = false;
-                    loader.style.display = 'none';
-                    isSpinning = false;
-                    spinBtn.disabled = false;
-                    betButtons.forEach(btn => btn.disabled = false);
-                    alert("❌ Недостаточно средств для игры!");
                 }
             } catch (e) {
                 console.error("Ошибка парсинга сообщения:", e);
