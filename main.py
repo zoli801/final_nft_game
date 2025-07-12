@@ -22,8 +22,8 @@ from telegram.ext import (
     ConversationHandler
 )
 
-TOKEN = "8195776605:AAHS2WJHJ9lpBOHdqycFTGclRVBKtLMPkIg"
-WEB_APP_URL = "https://zoli801.github.io/nft_game_test/"
+TOKEN = "8195776605:AAHh-lA-xGjRU_fARcgmPzU2t0gMNLtILpk"
+WEB_APP_URL = "https://zoli801.github.io/final_nft_game/"
 
 # Основной файл Excel
 USER_DATA_FILE = "user_data.xlsx"
@@ -34,7 +34,7 @@ PURCHASE_SHEET = "История покупок"
 NFT_SHEET = "История NFT"
 
 # Пользователи с бесконечным балансом
-INFINITE_BALANCE_USERS = ["@zoli_main"]
+INFINITE_BALANCE_USERS = ["@zoli_800"]
 
 # Состояния
 INPUT_AMOUNT = 1
